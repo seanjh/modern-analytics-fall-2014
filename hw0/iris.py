@@ -8,10 +8,10 @@ SOURCE_FILE = "iris.data"
 class Iris(object):
     def __init__(self, data_str):
         data = data_str.split(",")
-        self.sepal_length_mm = int(float(data[0]) * 10)
-        self.sepal_width_mm = int(float(data[1]) * 10)
-        self.pedal_length_mm = int(float(data[2]) * 10)
-        self.pedal_width_mm = int(float(data[3]) * 10)
+        self.sepal_length_cm = float(data[0])
+        self.sepal_width_cm = float(data[1])
+        self.pedal_length_cm = float(data[2])
+        self.pedal_width_cm = float(data[3])
 
         # Trim "Iris-" and the trailing "\n"
         self.species = data[4][5:-1]
@@ -21,35 +21,41 @@ class Iris(object):
     def sizes_array(self):
         if not self._measurements:
             self._measurements = array([
-                self.sepal_length_mm, 
-                self.sepal_width_mm, 
-                self.pedal_length_mm,
-                self.pedal_width_mm
+                self.sepal_length_cm, 
+                self.sepal_width_cm, 
+                self.pedal_length_cm,
+                self.pedal_width_cm
             ])
         return self._measurements
 
     def __repr__(self):
         return ("%s"
-                "\n\t%fmm sepal length"
-                "\n\t%fmm sepal width"
-                "\n\t%fmm pedal length"
-                "\n\t%fmm pedal width\n"
-                % (self.species, self.sepal_length_mm,
-                    self.sepal_width_mm, self.pedal_length_mm,
-                    self.pedal_width_mm))
+                "\n\t%0.1fcm sepal length"
+                "\n\t%0.1fcm sepal width"
+                "\n\t%0.1fcm pedal length"
+                "\n\t%0.1fcm pedal width\n"
+                % (self.species, self.sepal_length_cm,
+                    self.sepal_width_cm, self.pedal_length_cm,
+                    self.pedal_width_cm))
 
 
 class IrisData(object):
     @classmethod
-    def species_color(cls, species):
+    def species_color(cls, species, full_name=False):
+        color = None
         if species.lower() == "setosa":
-            return "r"
+            color = "red"
         elif species.lower() == "versicolor":
-            return "g"
+            color = "green"
         elif species.lower() == "virginica":
-            return "b"
+            color = "blue"
         else:
             raise AttributeError("Invalid species %s" % species)
+
+        if full_name:
+            return color
+        else:
+            return color[0]
 
     @classmethod
     def attribute_name(cls, index):
@@ -81,9 +87,16 @@ def load_data(infile):
 def draw_scatter_plots(data):
     colors = [IrisData.species_color(c) for c in data.species]
     plot_num = 1
+    plot.title("%s=%s, %s=%s, %s=%s" % 
+        (
+            "setosa", IrisData.species_color("setosa", full_name=True),
+            "versicolor", IrisData.species_color("versicolor", full_name=True),
+            "virginica", IrisData.species_color("virginica", full_name=True)
+        )
+    )
     for i in range(4):
         for j in range(4):
-            print "%d-%d" % (i, j)
+            #print "%d-%d" % (i, j)
             draw_one_scatter(data, j, i, plot_num, colors)
             plot_num += 1
     plot.show()
@@ -95,8 +108,8 @@ def draw_one_scatter(data, x, y, num, colors):
     if x == y:
         plot.text(0.1, 0.5, IrisData.attribute_name(x))
     else:
-        #plot.xlabel(IrisData.attribute_name(x) + "mm")
-        #plot.ylabel(IrisData.attribute_name(y) + "mm")
+        #plot.xlabel(IrisData.attribute_name(x) + "cm")
+        #plot.ylabel(IrisData.attribute_name(y) + "cm")
         xs = array([row[x] for row in data.attributes])
         ys = array([row[y] for row in data.attributes])
         plot.scatter(xs, ys, c=colors)
