@@ -63,8 +63,8 @@ class IrisData(object):
             return [
                 "Sepal Length",
                 "Sepal Width",
-                "Pedal Length",
-                "Pedal Width"
+                "Petal Length",
+                "Petal Width"
             ][index]
         except IndexError as e:
             print e
@@ -86,33 +86,27 @@ def load_data(infile):
 
 def draw_scatter_plots(data):
     colors = [IrisData.species_color(c) for c in data.species]
-    plot_num = 1
-    plot.title("%s=%s, %s=%s, %s=%s" % 
-        (
-            "setosa", IrisData.species_color("setosa", full_name=True),
-            "versicolor", IrisData.species_color("versicolor", full_name=True),
-            "virginica", IrisData.species_color("virginica", full_name=True)
-        )
-    )
+    plot.style.use('ggplot')
+    f, subplots = plot.subplots(4, 4)
+    f.suptitle("setosa=red, versicolor=green, virginica=blue")
     for i in range(4):
         for j in range(4):
-            #print "%d-%d" % (i, j)
-            draw_one_scatter(data, j, i, plot_num, colors)
-            plot_num += 1
+            draw_one_scatter(data, j, i, subplots[i][j], colors)
     plot.show()
     plot.savefig("iris-scatterplot.png")
 
 
-def draw_one_scatter(data, x, y, num, colors):
-    plot.subplot(4, 4, num)
+def draw_one_scatter(data, x, y, subplot, colors):
     if x == y:
-        plot.text(0.1, 0.5, IrisData.attribute_name(x))
+        subplot.text(0.5, 0.5, IrisData.attribute_name(x))
     else:
-        #plot.xlabel(IrisData.attribute_name(x) + "cm")
-        #plot.ylabel(IrisData.attribute_name(y) + "cm")
-        xs = array([row[x] for row in data.attributes])
-        ys = array([row[y] for row in data.attributes])
-        plot.scatter(xs, ys, c=colors)
+        # StackOverflow helped here. I knew there was a way to grab columns from
+        # the matrix, but couldn't figure it out, and was using list comprehensions
+        # instead. Source:
+        #   http://stackoverflow.com/questions/4455076/numpy-access-an-array-by-column
+        xs = data.attributes[:,x]
+        ys = data.attributes[:,y]
+        subplot.scatter(xs, ys, c=colors, alpha=0.6)
 
 
 def main():
